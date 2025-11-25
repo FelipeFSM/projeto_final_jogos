@@ -1,53 +1,134 @@
-// Importa a biblioteca 'material.dart', essencial do Flutter, que
-// define a classe 'MaterialApp' e os widgets de design 'Material'.
+// Importa a biblioteca 'material.dart', que contém os widgets visuais do Flutter.
 import 'package:flutter/material.dart';
 
-// Importa o arquivo da tela de login, permitindo que a classe
-// 'LoginView' seja referenciada neste arquivo.
-import 'package:projeto_final_jogos/views/login_view.dart';
+// Importa o pacote 'shared_preferences' para permitir salvar dados no dispositivo.
+import 'package:shared_preferences/shared_preferences.dart';
 
-// A função 'main()' é o ponto de entrada padrão para a execução de código Dart.
-void main() {
-  // 'runApp' é a função do Flutter que anexa o widget raiz (MyApp)
-  // à tela e inicializa o binding do framework.
-  runApp(const MyApp());
+// Define a classe da tela 'CadastroView' como um StatefulWidget.
+class CadastroView extends StatefulWidget {
+  const CadastroView({super.key});
+
+  @override
+  State<CadastroView> createState() => _CadastroViewState();
 }
 
-// 'MyApp' é o widget raiz da aplicação.
-// É um 'StatelessWidget', pois seu estado não mudará após ser criado.
-class MyApp extends StatelessWidget {
-  // Um construtor 'const' para este widget, permitindo otimizações de performance.
-  const MyApp({super.key});
+class _CadastroViewState extends State<CadastroView> {
+  // Controladores para ler o texto digitado.
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
-  // O método 'build' descreve a parte da interface do usuário
-  // representada por este widget.
+  @override
+  void dispose() {
+    _userController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  // Função chamada ao clicar em "Cadastrar".
+  // O 'async' é necessário para esperar o salvamento dos dados.
+  void _onRegisterPressed() async {
+    String username = _userController.text;
+    String password = _passwordController.text;
+    String confirmPassword = _confirmPasswordController.text;
+
+    // 1. Validação: Campos vazios
+    if (username.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, preencha todos os campos.')),
+      );
+      return;
+    }
+
+    // 2. Validação: Senhas iguais
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('As senhas não coincidem.')),
+      );
+      return;
+    }
+
+    // 3. Salvar no SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    await prefs.setString('password', password);
+
+    // 4. Sucesso e Navegação
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
+      );
+      // Volta para a tela de Login
+      Navigator.pop(context);
+    }
+  }
+
+  void _onLoginPressed() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 'MaterialApp' é o widget que encapsula a aplicação 'Material Design'.
-    // Ele fornece configuração para temas, rotas e navegação.
-    return MaterialApp(
-      // Desativa a faixa de "DEBUG" no canto superior direito.
-      debugShowCheckedModeBanner: false,
-      
-      // Um título descritivo da aplicação para o sistema operacional.
-      title: 'Catálogo de Jogos',
-      
-      // 'theme' define os dados de configuração visual da aplicação.
-      theme: ThemeData(
-        // 'brightness' define o brilho geral do tema (claro ou escuro).
-        brightness: Brightness.dark,
-        
-        // 'primarySwatch' define uma coleção de cores (MaterialColor)
-        // que o framework usará para componentes de interface.
-        primarySwatch: Colors.blue,
-        
-        // Adapta a densidade visual da interface para a plataforma de destino.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Cadastro',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: _userController,
+                  decoration: const InputDecoration(
+                    labelText: 'Usuário',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Senha',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirmar Senha',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: _onRegisterPressed,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text('Cadastrar'),
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: _onLoginPressed,
+                  child: const Text('Já tem uma conta? Faça login'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
-
-      // 'home' define o widget (rota) padrão que será exibido
-      // quando a aplicação for iniciada.
-      home: const LoginView(), // A 'LoginView' é definida como a tela inicial.
     );
   }
 }

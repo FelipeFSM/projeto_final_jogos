@@ -1,53 +1,55 @@
-// Importa a biblioteca 'material.dart', essencial do Flutter, que
-// define a classe 'MaterialApp' e os widgets de design 'Material'.
+// Importa biblioteca principal do Flutter
 import 'package:flutter/material.dart';
 
-// Importa o arquivo da tela de login, permitindo que a classe
-// 'LoginView' seja referenciada neste arquivo.
-import 'package:projeto_final_jogos/views/login_view.dart';
+// Importa pacote para gerenciamento de preferências
+import 'package:shared_preferences/shared_preferences.dart';
 
-// A função 'main()' é o ponto de entrada padrão para a execução de código Dart.
-void main() {
-  // 'runApp' é a função do Flutter que anexa o widget raiz (MyApp)
-  // à tela e inicializa o binding do framework.
-  runApp(const MyApp());
+// Importa telas do aplicativo
+import 'package:projeto_final_jogos/views/login_view.dart';
+import 'package:projeto_final_jogos/views/backlog_view.dart';
+
+// Define função principal assíncrona
+Future<void> main() async {
+  // Garante inicialização do binding do Flutter antes de operações assíncronas
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Obtém instância singleton do SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+
+  // Verifica existência da chave 'username' para determinar estado de login
+  bool isLogged = prefs.getString('username') != null;
+
+  // Inicializa aplicação injetando estado de login inicial
+  runApp(MyApp(startLogged: isLogged));
 }
 
-// 'MyApp' é o widget raiz da aplicação.
-// É um 'StatelessWidget', pois seu estado não mudará após ser criado.
+// Widget raiz da aplicação
 class MyApp extends StatelessWidget {
-  // Um construtor 'const' para este widget, permitindo otimizações de performance.
-  const MyApp({super.key});
+  // Propriedade imutável para armazenar estado inicial de login
+  final bool startLogged;
 
-  // O método 'build' descreve a parte da interface do usuário
-  // representada por este widget.
+  // Construtor que requer o parâmetro startLogged
+  const MyApp({super.key, required this.startLogged});
+
+  // Constrói a árvore de widgets da aplicação
   @override
   Widget build(BuildContext context) {
-    // 'MaterialApp' é o widget que encapsula a aplicação 'Material Design'.
-    // Ele fornece configuração para temas, rotas e navegação.
+    // Configura aplicação Material Design
     return MaterialApp(
-      // Desativa a faixa de "DEBUG" no canto superior direito.
+      // Oculta banner de debug
       debugShowCheckedModeBanner: false,
-      
-      // Um título descritivo da aplicação para o sistema operacional.
+      // Define título da aplicação
       title: 'Catálogo de Jogos',
-      
-      // 'theme' define os dados de configuração visual da aplicação.
+      // Configura tema global da aplicação
       theme: ThemeData(
-        // 'brightness' define o brilho geral do tema (claro ou escuro).
         brightness: Brightness.dark,
-        
-        // 'primarySwatch' define uma coleção de cores (MaterialColor)
-        // que o framework usará para componentes de interface.
         primarySwatch: Colors.blue,
-        
-        // Adapta a densidade visual da interface para a plataforma de destino.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-
-      // 'home' define o widget (rota) padrão que será exibido
-      // quando a aplicação for iniciada.
-      home: const LoginView(), // A 'LoginView' é definida como a tela inicial.
+      
+      // Define tela inicial baseado no estado de login persistido
+      // Se logado, renderiza BacklogView, caso contrário, LoginView
+      home: startLogged ? const BacklogView() : const LoginView(),
     );
   }
 }
