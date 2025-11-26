@@ -1,10 +1,7 @@
-// Importa a biblioteca 'material.dart', que contém os widgets visuais do Flutter.
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
-// Importa o pacote 'shared_preferences' para permitir salvar dados no dispositivo.
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Define a classe da tela 'CadastroView' como um StatefulWidget.
 class CadastroView extends StatefulWidget {
   const CadastroView({super.key});
 
@@ -13,59 +10,51 @@ class CadastroView extends StatefulWidget {
 }
 
 class _CadastroViewState extends State<CadastroView> {
-  // Controladores para ler o texto digitado.
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  
+  Future<void>? _cadastroFuture;
 
-  @override
-  void dispose() {
-    _userController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
+  Future<void> _processarCadastro() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    if (!mounted) return;
 
-  // Função chamada ao clicar em "Cadastrar".
-  // O 'async' é necessário para esperar o salvamento dos dados.
-  void _onRegisterPressed() async {
-    String username = _userController.text;
+    String username = _userController.text.trim();
     String password = _passwordController.text;
     String confirmPassword = _confirmPasswordController.text;
 
-    // 1. Validação: Campos vazios
-    if (username.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, preencha todos os campos.')),
-      );
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos.')));
       return;
     }
 
-    // 2. Validação: Senhas iguais
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('As senhas não coincidem.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('As senhas não coincidem.')));
       return;
     }
 
-    // 3. Salvar no SharedPreferences
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', username);
-    await prefs.setString('password', password);
+    String? usersJson = prefs.getString('users_db');
+    Map<String, dynamic> usersMap = {};
+    
+    if (usersJson != null) {
+      usersMap = jsonDecode(usersJson);
+    }
 
-    // 4. Sucesso e Navegação
+    if (usersMap.containsKey(username)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Usuário já existe! Tente outro nome.')));
+      return;
+    }
+
+    usersMap[username] = password;
+    await prefs.setString('users_db', jsonEncode(usersMap));
+
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
-      );
-      // Volta para a tela de Login
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cadastro realizado com sucesso!')));
       Navigator.pop(context);
     }
-  }
-
-  void _onLoginPressed() {
-    Navigator.pop(context);
   }
 
   @override
@@ -78,52 +67,37 @@ class _CadastroViewState extends State<CadastroView> {
             constraints: const BoxConstraints(maxWidth: 400),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Cadastro',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
+                const Text('Cadastro', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 40),
-                TextField(
-                  controller: _userController,
-                  decoration: const InputDecoration(
-                    labelText: 'Usuário',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                TextField(controller: _userController, decoration: const InputDecoration(labelText: 'Usuário', border: OutlineInputBorder())),
                 const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Senha',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                TextField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Senha', border: OutlineInputBorder())),
                 const SizedBox(height: 20),
-                TextField(
-                  controller: _confirmPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirmar Senha',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                TextField(controller: _confirmPasswordController, obscureText: true, decoration: const InputDecoration(labelText: 'Confirmar Senha', border: OutlineInputBorder())),
                 const SizedBox(height: 40),
-                ElevatedButton(
-                  onPressed: _onRegisterPressed,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('Cadastrar'),
+                
+                FutureBuilder<void>(
+                  future: _cadastroFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _cadastroFuture = _processarCadastro();
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+                      child: const Text('Cadastrar'),
+                    );
+                  },
                 ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: _onLoginPressed,
-                  child: const Text('Já tem uma conta? Faça login'),
-                ),
+                // -------------------------------------
+
+                const SizedBox(height: 10),
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Voltar para Login')),
               ],
             ),
           ),

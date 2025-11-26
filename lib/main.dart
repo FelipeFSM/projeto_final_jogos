@@ -1,55 +1,62 @@
-// Importa biblioteca principal do Flutter
 import 'package:flutter/material.dart';
-
-// Importa pacote para gerenciamento de preferências
 import 'package:shared_preferences/shared_preferences.dart';
+import 'views/login_view.dart';
+import 'views/cadastro_view.dart';
+import 'views/backlog_view.dart';
+import 'views/busca_view.dart';
+import 'views/detalhes_view.dart';
+import 'views/jogo_form_view.dart';
 
-// Importa telas do aplicativo
-import 'package:projeto_final_jogos/views/login_view.dart';
-import 'package:projeto_final_jogos/views/backlog_view.dart';
-
-// Define função principal assíncrona
-Future<void> main() async {
-  // Garante inicialização do binding do Flutter antes de operações assíncronas
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Obtém instância singleton do SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
-
-  // Verifica existência da chave 'username' para determinar estado de login
-  bool isLogged = prefs.getString('username') != null;
-
-  // Inicializa aplicação injetando estado de login inicial
-  runApp(MyApp(startLogged: isLogged));
+  runApp(const MyApp());
 }
 
-// Widget raiz da aplicação
 class MyApp extends StatelessWidget {
-  // Propriedade imutável para armazenar estado inicial de login
-  final bool startLogged;
+  const MyApp({super.key});
 
-  // Construtor que requer o parâmetro startLogged
-  const MyApp({super.key, required this.startLogged});
+  Future<bool> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('is_logged') ?? false;
+  }
 
-  // Constrói a árvore de widgets da aplicação
   @override
   Widget build(BuildContext context) {
-    // Configura aplicação Material Design
     return MaterialApp(
-      // Oculta banner de debug
       debugShowCheckedModeBanner: false,
-      // Define título da aplicação
-      title: 'Catálogo de Jogos',
-      // Configura tema global da aplicação
+      title: 'Projeto Jogos',
       theme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        primarySwatch: Colors.deepPurple,
+        useMaterial3: true,
       ),
       
-      // Define tela inicial baseado no estado de login persistido
-      // Se logado, renderiza BacklogView, caso contrário, LoginView
-      home: startLogged ? const BacklogView() : const LoginView(),
+      home: FutureBuilder<bool>(
+        future: _checkLoginStatus(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          
+          // Se já verificou:
+          if (snapshot.hasData && snapshot.data == true) {
+            return const BacklogView(); 
+          } else {
+            return const LoginView(); 
+          }
+        },
+      ),
+
+      routes: {
+        '/login': (context) => const LoginView(),
+        '/cadastro': (context) => const CadastroView(),
+        '/backlog': (context) => const BacklogView(),
+        '/busca': (context) => const BuscaView(),
+        '/detalhes': (context) => const DetalhesView(),
+        '/form': (context) => const JogoFormView(),
+      },
     );
   }
 }
