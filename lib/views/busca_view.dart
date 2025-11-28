@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/game_model.dart';
 
 class BuscaView extends StatefulWidget {
@@ -13,9 +13,7 @@ class BuscaView extends StatefulWidget {
 
 class _BuscaViewState extends State<BuscaView> {
   Future<List<Game>>? _futureJogos;
-  
   final TextEditingController _searchController = TextEditingController();
-
   List<Game> _allGames = [];
   List<Game> _displayedGames = [];
   int _currentPage = 0;
@@ -37,16 +35,11 @@ class _BuscaViewState extends State<BuscaView> {
   Future<void> _carregarUltimaBusca() async {
     final prefs = await SharedPreferences.getInstance();
     final String? lastSearch = prefs.getString('last_search');
-    
     if (lastSearch != null && lastSearch.isNotEmpty) {
-      setState(() {
-        _searchController.text = lastSearch;
-      });
-      
+      setState(() { _searchController.text = lastSearch; });
     }
   }
 
-  
   Future<void> _salvarBusca(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('last_search', value);
@@ -54,21 +47,12 @@ class _BuscaViewState extends State<BuscaView> {
 
   Future<List<Game>> _fetchGames() async {
     final response = await http.get(Uri.parse('https://corsproxy.io/?https://www.freetogame.com/api/games'));
-
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       final games = data.map((json) => Game.fromJson(json)).toList();
-      
-      
       _allGames = games;
-      
-      
-      if (_searchController.text.isNotEmpty) {
-        _runFilter(_searchController.text);
-      } else {
-        _updateDisplayedGames();
-      }
-      
+      if (_searchController.text.isNotEmpty) _runFilter(_searchController.text);
+      else _updateDisplayedGames();
       return games;
     } else {
       throw Exception('Falha ao carregar jogos: ${response.statusCode}');
@@ -95,9 +79,7 @@ class _BuscaViewState extends State<BuscaView> {
   }
 
   void _runFilter(String keyword) {
-    
     _salvarBusca(keyword);
-
     if (keyword.isEmpty) {
       _updateDisplayedGames();
       setState(() {});
@@ -111,28 +93,23 @@ class _BuscaViewState extends State<BuscaView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Buscar Jogos (API)")),
+      appBar: AppBar(title: const Text("Procure seu jogo")),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              controller: _searchController, // Conecta o controlador
+              controller: _searchController,
               onChanged: (value) => _runFilter(value),
-              decoration: const InputDecoration(
-                labelText: 'Pesquisar...', 
-                prefixIcon: Icon(Icons.search), 
-                border: OutlineInputBorder()
-              ),
+              decoration: const InputDecoration(labelText: 'Pesquisar...', prefixIcon: Icon(Icons.search), border: OutlineInputBorder()),
             ),
           ),
           Expanded(
             child: FutureBuilder<List<Game>>(
               future: _futureJogos,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
+                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+                if (snapshot.hasError) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -140,41 +117,45 @@ class _BuscaViewState extends State<BuscaView> {
                         const Icon(Icons.error_outline, size: 60, color: Colors.red),
                         const SizedBox(height: 10),
                         Text('Erro: ${snapshot.error}', textAlign: TextAlign.center),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() { _futureJogos = _fetchGames(); });
-                          },
-                          child: const Text("Tentar Novamente")
-                        )
+                        ElevatedButton(onPressed: () { setState(() { _futureJogos = _fetchGames(); }); }, child: const Text("Tentar Novamente"))
                       ],
-                    )
+                    ),
                   );
-                } else if (snapshot.hasData) {
+                }
+                if (snapshot.hasData) {
                   return ListView.builder(
                     itemCount: _displayedGames.length,
                     itemBuilder: (context, index) {
                       final game = _displayedGames[index];
                       return Card(
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         child: ListTile(
-                          leading: Image.network(
-                            'https://corsproxy.io/?${game.thumbnail}',
-                            width: 50, fit: BoxFit.cover,
-                            errorBuilder: (_,__,___) => const Icon(Icons.broken_image),
+                          contentPadding: const EdgeInsets.all(10),
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Hero(
+                              tag: 'game_img_${game.id}',
+                              child: Image.network(
+                                'https://corsproxy.io/?${game.thumbnail}',
+                                width: 80, height: 60, fit: BoxFit.cover,
+                                errorBuilder: (_,__,___) => const Icon(Icons.broken_image),
+                              ),
+                            ),
                           ),
-                          title: Text(game.title),
-                          subtitle: const Text("Toque para detalhes"),
+                          title: Text(game.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: const Padding(padding: EdgeInsets.only(top: 5), child: Text("Toque para ver detalhes", style: TextStyle(fontSize: 12))),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                           onTap: () => Navigator.pushNamed(context, '/detalhes', arguments: game),
                         ),
                       );
                     },
                   );
-                } else {
-                  return const Center(child: Text("Nenhum dado encontrado."));
                 }
+                return const Center(child: Text("Nenhum dado encontrado."));
               },
             ),
           ),
-          
           if (_allGames.isNotEmpty && _searchController.text.isEmpty)
             Container(
               padding: const EdgeInsets.all(10),

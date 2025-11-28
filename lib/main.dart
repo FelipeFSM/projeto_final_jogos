@@ -24,31 +24,43 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Projeto Jogos',
+      title: 'Game Backlog',
       theme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.deepPurple,
         useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+          primary: const Color(0xFF6C63FF),
+          secondary: const Color(0xFF03DAC6),
+          surface: const Color(0xFF1E1E1E),
+        ),
+        scaffoldBackgroundColor: const Color(0xFF121212),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          backgroundColor: Color(0xFF1E1E1E),
+          elevation: 0,
+        ),
+        // CORREÇÃO AQUI: Usando CardThemeData em vez de CardTheme
+        cardTheme: const CardThemeData(
+          color: Color(0xFF2C2C2C),
+          elevation: 4,
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Se der erro no const, remova esta linha ou o const
+        ),
       ),
-      
       home: FutureBuilder<bool>(
         future: _checkLoginStatus(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
-          
-          // Se já verificou:
           if (snapshot.hasData && snapshot.data == true) {
-            return const BacklogView(); 
+            return const BacklogView();
           } else {
-            return const LoginView(); 
+            return const LoginView();
           }
         },
       ),
-
       routes: {
         '/login': (context) => const LoginView(),
         '/cadastro': (context) => const CadastroView(),

@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../models/post_model.dart'; 
+import '../models/post_model.dart';
 
 class PlaceholderService {
   final String _baseUrl = "https://jsonplaceholder.typicode.com/posts";
@@ -8,10 +8,9 @@ class PlaceholderService {
   Future<bool> simularCreate(String titulo, String descricao) async {
     try {
       final novoPost = Post(title: titulo, body: descricao, userId: 1);
-
       final response = await http.post(
         Uri.parse(_baseUrl),
-        body: jsonEncode(novoPost.toJson()), 
+        body: jsonEncode(novoPost.toJson()),
         headers: {'Content-type': 'application/json; charset=UTF-8'},
       );
       return response.statusCode == 201;
@@ -22,12 +21,10 @@ class PlaceholderService {
 
   Future<bool> simularUpdate(int id, String titulo, String descricao) async {
     try {
-      
       final postEditado = Post(id: 1, title: titulo, body: descricao, userId: 1);
-
       final response = await http.put(
         Uri.parse('$_baseUrl/1'), 
-        body: jsonEncode(postEditado.toJson()), 
+        body: jsonEncode(postEditado.toJson()),
         headers: {'Content-type': 'application/json; charset=UTF-8'},
       );
       return response.statusCode == 200;
