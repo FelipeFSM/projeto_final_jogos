@@ -13,6 +13,7 @@ class Game {
     this.shortDescription = '',
   });
 
+// Conectividade (API): Criação de PODOs com método fromJson.
   factory Game.fromJson(Map<String, dynamic> json) {
     return Game(
       id: json['id'] ?? 0,
@@ -30,7 +31,7 @@ class Game {
       'short_description': shortDescription,
     };
   }
-
+// Persistência Local: Métodos auxiliares para converter Lista <-> JSON string.
   static String encode(List<Game> games) => json.encode(
         games.map<Map<String, dynamic>>((game) => game.toJson()).toList(),
       );

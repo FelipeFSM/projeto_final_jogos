@@ -7,10 +7,12 @@ class DetalhesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Navegação: Recuperação dos dados passados via arguments.
     final Game game = ModalRoute.of(context)!.settings.arguments as Game;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      // Estrutura e Layout: Layouts responsivos usando Stack, Positioned, Column e Container.
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,

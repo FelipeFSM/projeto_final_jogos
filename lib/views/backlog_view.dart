@@ -23,12 +23,15 @@ class _BacklogViewState extends State<BacklogView> {
 
   Future<List<Game>> _iniciarSessaoECarregar() async {
     final prefs = await SharedPreferences.getInstance();
+
     final String? currentUser = prefs.getString('current_user');
     if (currentUser != null && currentUser.isNotEmpty) {
       _userKey = 'backlog_$currentUser';
     } else {
       _userKey = 'meus_jogos';
     }
+    // Persistência Local: Leitura da string JSON e conversão (decode) para List<Game>.
+    // Prova de Persistência: Dados sobrevivem ao refresh (F5) pois são lidos do SharedPreferences ao iniciar.
     final String? jogosString = prefs.getString(_userKey);
     if (jogosString != null) return Game.decode(jogosString);
     return [];

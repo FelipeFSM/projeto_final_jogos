@@ -59,6 +59,8 @@ class MyApp extends StatelessWidget {
           }
         },
       ),
+      
+      // Navegação: Uso de Rotas Nomeadas para gerenciar a navegação.
       routes: {
         '/login': (context) => const LoginView(),
         '/cadastro': (context) => const CadastroView(),

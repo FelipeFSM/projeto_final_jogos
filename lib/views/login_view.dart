@@ -44,6 +44,7 @@ class _LoginViewState extends State<LoginView> {
     }
 
     if (usersMap.containsKey(inputUser) && usersMap[inputUser] == inputPass) {
+      // Persistência Local: Uso do shared_preferences para salvar dados simples (login status e usuário atual).
       await prefs.setBool('is_logged', true);
       await prefs.setString('current_user', inputUser);
       if (mounted) Navigator.pushReplacementNamed(context, '/backlog');
@@ -108,6 +109,7 @@ class _LoginViewState extends State<LoginView> {
                       crossAxisAlignment: CrossAxisAlignment.stretch, 
                       children: [
                         
+                        // Eventos e Formulários: Formulário com TextFields e Controllers.
                         TextField(
                           controller: _userController,
                           style: const TextStyle(fontSize: 15),

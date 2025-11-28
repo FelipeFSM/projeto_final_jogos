@@ -46,6 +46,8 @@ class _BuscaViewState extends State<BuscaView> {
   }
 
   Future<List<Game>> _fetchGames() async {
+
+    // Conectividade (API): Consumo de API RESTful externa (FreeToGame) usando pacote http (async/await).
     final response = await http.get(Uri.parse('https://corsproxy.io/?https://www.freetogame.com/api/games'));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -105,6 +107,7 @@ class _BuscaViewState extends State<BuscaView> {
             ),
           ),
           Expanded(
+            // Conectividade (API): Uso do FutureBuilder para exibir dados da API (gerenciando loading, error e data).
             child: FutureBuilder<List<Game>>(
               future: _futureJogos,
               builder: (context, snapshot) {
