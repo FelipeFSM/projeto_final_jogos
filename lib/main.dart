@@ -41,11 +41,9 @@ class MyApp extends StatelessWidget {
           backgroundColor: Color(0xFF1E1E1E),
           elevation: 0,
         ),
-        // CORREÇÃO AQUI: Usando CardThemeData em vez de CardTheme
         cardTheme: const CardThemeData(
           color: Color(0xFF2C2C2C),
           elevation: 4,
-          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Se der erro no const, remova esta linha ou o const
         ),
       ),
       home: FutureBuilder<bool>(

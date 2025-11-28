@@ -44,7 +44,6 @@ class _JogoFormViewState extends State<JogoFormView> {
     if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enviando para JSONPlaceholder...")));
       
-      // Delay artificial para ver o loading no botão
       await Future.delayed(const Duration(milliseconds: 500));
       
       bool sucessoApi = false;
@@ -71,12 +70,12 @@ class _JogoFormViewState extends State<JogoFormView> {
       appBar: AppBar(
         title: Text(_isEditing ? 'Editar Jogo' : 'Novo Jogo'),
       ),
-      body: Center( // Centraliza tudo na tela
-        child: SingleChildScrollView( // Permite rolar se a tela for pequena verticalmente
+      body: Center( 
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: ConstrainedBox(
-              // Limita a largura para não esticar demais no PC
+              
               constraints: const BoxConstraints(maxWidth: 500), 
               child: Form(
                 key: _formKey,
@@ -84,7 +83,7 @@ class _JogoFormViewState extends State<JogoFormView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Ícone de destaque no topo
+                    
                     Icon(
                       _isEditing ? Icons.edit_note_rounded : Icons.add_circle_outline_rounded,
                       size: 80,
@@ -98,7 +97,7 @@ class _JogoFormViewState extends State<JogoFormView> {
                     ),
                     const SizedBox(height: 30),
 
-                    // Campos do Formulário
+                    
                     TextFormField(
                       controller: _titleController,
                       decoration: const InputDecoration(
@@ -122,31 +121,28 @@ class _JogoFormViewState extends State<JogoFormView> {
                     ),
                     const SizedBox(height: 20),
                     
-                    // --- CORREÇÃO DO CAMPO DESCRIÇÃO ---
+                    
                     TextFormField(
                       controller: _descController,
-                      textAlignVertical: TextAlignVertical.top, // Alinha texto no topo
+                      textAlignVertical: TextAlignVertical.top, 
                       decoration: const InputDecoration(
                         labelText: 'Descrição', 
-                        // Removemos o prefixIcon e usamos prefix para alinhar melhor ou mantemos
-                        // mas com alignLabelWithHint que ajuda.
-                        // O segredo para o ícone não ficar no meio de um campo grande é não usar maxLines fixo muito alto
-                        // ou usar minLines e maxLines.
+                        
                         prefixIcon: Padding(
-                          padding: EdgeInsets.only(bottom: 40), // Empurra o ícone pra cima (ajuste manual)
+                          padding: EdgeInsets.only(bottom: 40), 
                           child: Icon(Icons.description_outlined),
                         ),
                         border: OutlineInputBorder(),
                         isDense: true,
-                        alignLabelWithHint: true, // Alinha o label no topo
+                        alignLabelWithHint: true, 
                       ),
-                      maxLines: 3, // Reduzi de 4 para 3 para ficar menos "alto"
+                      maxLines: 3, 
                     ),
-                    // -----------------------------------
+                    
                     
                     const SizedBox(height: 30),
 
-                    // Botão Centralizado e Compacto
+                    
                     Center(
                       child: FutureBuilder<void>(
                         future: _salvarFuture,
@@ -161,7 +157,7 @@ class _JogoFormViewState extends State<JogoFormView> {
                               _isEditing ? 'Atualizar' : 'Criar',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            // O estilo base vem do main.dart, mas aqui garantimos o tamanho
+                          
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                             ),

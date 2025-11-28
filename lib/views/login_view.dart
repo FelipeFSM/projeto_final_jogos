@@ -13,7 +13,6 @@ class _LoginViewState extends State<LoginView> {
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  // Controle do estado do botão (Loading)
   Future<void>? _loginFuture;
 
   @override
@@ -24,7 +23,6 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<void> _processarLogin() async {
-    // Pequeno delay para efeito visual
     await Future.delayed(const Duration(milliseconds: 500));
     
     if (!mounted) return;
@@ -53,14 +51,13 @@ class _LoginViewState extends State<LoginView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Usuário ou senha incorretos.')));
       }
-      throw Exception('Login falhou'); // Lança erro para parar o loading do botão se necessário
+      throw Exception('Login falhou'); 
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Fundo degradê sutil para dar profundidade
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -78,7 +75,6 @@ class _LoginViewState extends State<LoginView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Ícone solto fora do cartão para efeito 3D
                 Hero(
                   tag: 'app_logo',
                   child: Icon(
@@ -100,18 +96,18 @@ class _LoginViewState extends State<LoginView> {
                 
                 const SizedBox(height: 30),
 
-                // O CARTÃO DE LOGIN
+                
                 Card(
                   elevation: 8,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  color: const Color(0xFF252525), // Um pouco mais claro que o fundo
+                  color: const Color(0xFF252525), 
                   child: Container(
-                    width: 380, // Largura máxima do cartão
+                    width: 380, 
                     padding: const EdgeInsets.all(32.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch, // Estica os Inputs
+                      crossAxisAlignment: CrossAxisAlignment.stretch, 
                       children: [
-                        // Campo Usuário
+                        
                         TextField(
                           controller: _userController,
                           style: const TextStyle(fontSize: 15),
@@ -127,7 +123,7 @@ class _LoginViewState extends State<LoginView> {
                         
                         const SizedBox(height: 20),
                         
-                        // Campo Senha
+                        
                         TextField(
                           controller: _passwordController,
                           obscureText: true,
@@ -144,12 +140,11 @@ class _LoginViewState extends State<LoginView> {
                         
                         const SizedBox(height: 30),
 
-                        // BOTÃO DE LOGIN (Centralizado e Compacto)
+                        
                         Center(
                           child: FutureBuilder<void>(
                             future: _loginFuture,
                             builder: (context, snapshot) {
-                              // Se estiver carregando
                               if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const SizedBox(
                                   width: 24, height: 24, 
@@ -157,18 +152,18 @@ class _LoginViewState extends State<LoginView> {
                                 );
                               }
                               
-                              // Botão Normal
+                              
                               return SizedBox(
-                                width: 200, // Largura fixa elegante
-                                height: 45, // Altura confortável
+                                width: 200, 
+                                height: 45, 
                                 child: ElevatedButton(
                                   onPressed: () { 
                                     setState(() { _loginFuture = _processarLogin(); }); 
                                   },
                                   style: ElevatedButton.styleFrom(
                                     elevation: 4,
-                                    shape: const StadiumBorder(), // Formato Pílula
-                                    padding: EdgeInsets.zero, // Remove padding interno extra
+                                    shape: const StadiumBorder(), 
+                                    padding: EdgeInsets.zero, 
                                   ),
                                   child: const Text(
                                     'ENTRAR', 
@@ -186,7 +181,6 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 20),
 
-                // Link para Cadastro
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, '/cadastro'),
                   child: RichText(
